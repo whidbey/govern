@@ -12,10 +12,13 @@ import xyz.frt.govern.common.BaseUtils;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class UserControllerTest extends GovernApplicationTests {
@@ -24,13 +27,22 @@ public class UserControllerTest extends GovernApplicationTests {
 
     private MockMvc mockMvc;
 
-    private FieldDescriptor[] user_desc = new FieldDescriptor[] {
+    private FieldDescriptor[] user_desc = new FieldDescriptor[]{
             fieldWithPath(AppConst.KEY_DATA_MAP_DOTE_DATA + ".username").description("用户名")
-            ,fieldWithPath(AppConst.KEY_DATA_MAP_DOTE_DATA + ".header").description("头像图片")
-            ,fieldWithPath(AppConst.KEY_DATA_MAP_DOTE_DATA + ".trueName").description("真实姓名")
-            ,fieldWithPath(AppConst.KEY_DATA_MAP_DOTE_DATA + ".password").description("用户密码")
-            ,fieldWithPath(AppConst.KEY_DATA_MAP_DOTE_DATA + ".salt").description("盐值")
-            ,fieldWithPath(AppConst.KEY_DATA_MAP_DOTE_DATA + ".phone").description("联系电话")
+            , fieldWithPath(AppConst.KEY_DATA_MAP_DOTE_DATA + ".header").description("头像图片")
+            , fieldWithPath(AppConst.KEY_DATA_MAP_DOTE_DATA + ".trueName").description("真实姓名")
+            , fieldWithPath(AppConst.KEY_DATA_MAP_DOTE_DATA + ".password").description("用户密码")
+            , fieldWithPath(AppConst.KEY_DATA_MAP_DOTE_DATA + ".salt").description("盐值")
+            , fieldWithPath(AppConst.KEY_DATA_MAP_DOTE_DATA + ".phone").description("联系电话")
+    };
+
+    private FieldDescriptor[] user_array_desc = new FieldDescriptor[]{
+            fieldWithPath(AppConst.KEY_DATA_MAP_DETE_DATA_ARRAY + ".username").description("用户名")
+            , fieldWithPath(AppConst.KEY_DATA_MAP_DETE_DATA_ARRAY + ".header").description("头像图片")
+            , fieldWithPath(AppConst.KEY_DATA_MAP_DETE_DATA_ARRAY + ".trueName").description("真实姓名")
+            , fieldWithPath(AppConst.KEY_DATA_MAP_DETE_DATA_ARRAY + ".password").description("用户密码")
+            , fieldWithPath(AppConst.KEY_DATA_MAP_DETE_DATA_ARRAY + ".salt").description("盐值")
+            , fieldWithPath(AppConst.KEY_DATA_MAP_DETE_DATA_ARRAY + ".phone").description("联系电话")
     };
 
     @Before
@@ -46,7 +58,13 @@ public class UserControllerTest extends GovernApplicationTests {
                 .andDo(document(MODULE + "根据ID加载用户",
                         pathParameters(
                                 parameterWithName(AppConst.KEY_ID).description("用户ID")),
-                        responseFields(BaseUtils.mergeArrays(basic_json_desc, basic_entity_desc, user_desc)))
+                        responseFields(
+                                subsectionWithPath("dataMap.data").description("响应数据详情")
+                        ),
+                        relaxedResponseFields(
+                                fieldWithPath("code").description("响应码"),
+                                fieldWithPath("msg").description("响应消息")
+                        ))
                 );
     }
 
@@ -117,12 +135,24 @@ public class UserControllerTest extends GovernApplicationTests {
     }
 
     @Test
-    public void findUsers() {
+    public void findUsers() throws Exception {
+        mockMvc.perform(get("/users")
+                .header(AppConst.KEY_AUTHORIZATION, TOKEN)
+                .param("page", "1")
+                .param("limit", "10")
+                .accept(MediaType.APPLICATION_JSON)
+        )
+                .andExpect(status().isOk())
+                .andDo(document(MODULE + "用户分页数据",
+                        requestHeaders(
+                                headerWithName(AppConst.KEY_AUTHORIZATION).description("用户认证token")
+                        )));
+
     }
 
     @Test
     public void findAllUsers() throws Exception {
-        mockMvc.perform(get("/users").header(
+        mockMvc.perform(get("/users/all").header(
                 AppConst.KEY_AUTHORIZATION, TOKEN
         )
                 .accept(MediaType.APPLICATION_JSON))
@@ -130,6 +160,9 @@ public class UserControllerTest extends GovernApplicationTests {
                 .andDo(document(MODULE + "获取所有用户",
                         requestHeaders(
                                 headerWithName(AppConst.KEY_AUTHORIZATION).description("用户认证token")
+                        ),
+                        responseFields(
+                                BaseUtils.mergeArrays(basic_json_desc, basic_entity_desc, user_array_desc)
                         )
                 ));
     }

@@ -36,4 +36,6 @@ public class AppConst {
 
     public static final String KEY_PHONE = "phone";
     public static final String KEY_DATA_MAP_DOTE_DATA = "dataMap.data";
+
+    public static final String KEY_DATA_MAP_DETE_DATA_ARRAY = "dataMap.data[]";
 }

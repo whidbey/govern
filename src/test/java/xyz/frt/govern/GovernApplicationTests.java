@@ -24,6 +24,7 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
@@ -45,7 +46,7 @@ public class GovernApplicationTests {
 
     private MockMvc mockMvc;
 
-    protected FieldDescriptor[] basic_json_desc = new FieldDescriptor[] {
+    protected FieldDescriptor[] basic_json_desc = new FieldDescriptor[]{
             fieldWithPath(AppConst.KEY_CODE).description("响应码"),
             fieldWithPath(AppConst.KEY_MSG).description("响应消息"),
             fieldWithPath(AppConst.KEY_DATA_MAP).description("响应数据集")
@@ -53,12 +54,12 @@ public class GovernApplicationTests {
 
     protected FieldDescriptor[] basic_entity_desc = new FieldDescriptor[]{
             fieldWithPath("dataMap.data").description("相应数据")
-            ,fieldWithPath("dataMap.data.id").description("ID")
-            ,fieldWithPath("dataMap.data.creator").description("创建人")
-            ,fieldWithPath("dataMap.data.creatorId").description("创建人ID")
-            ,fieldWithPath("dataMap.data.createTime").description("创建时间")
-            ,fieldWithPath("dataMap.data.isEnable").description("是否启用")
-            ,fieldWithPath("dataMap.data.remark").description("备注")
+            , fieldWithPath("dataMap.data.id").description("ID")
+            , fieldWithPath("dataMap.data.creator").description("创建人")
+            , fieldWithPath("dataMap.data.creatorId").description("创建人ID")
+            , fieldWithPath("dataMap.data.createTime").description("创建时间")
+            , fieldWithPath("dataMap.data.isEnable").description("是否启用")
+            , fieldWithPath("dataMap.data.remark").description("备注")
     };
 
     @Before
@@ -70,7 +71,9 @@ public class GovernApplicationTests {
 
     protected MockMvc buildMockMvc(WebApplicationContext context) {
         return MockMvcBuilders.webAppContextSetup(context)
-                .apply(documentationConfiguration(restDocumentation))
+                .apply(documentationConfiguration(restDocumentation)
+                        .operationPreprocessors()
+                        .withResponseDefaults(prettyPrint()))
                 .build();
     }
 

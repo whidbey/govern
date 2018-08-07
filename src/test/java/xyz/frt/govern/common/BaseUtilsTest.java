@@ -2,14 +2,11 @@ package xyz.frt.govern.common;
 
 import org.junit.Before;
 import org.junit.Test;
-import xyz.frt.govern.GovernApplicationTests;
 import xyz.frt.govern.model.User;
 
 import java.util.Map;
 
-import static org.junit.Assert.*;
-
-public class BaseUtilsTest extends GovernApplicationTests {
+public class BaseUtilsTest {
 
     private User user;
 
